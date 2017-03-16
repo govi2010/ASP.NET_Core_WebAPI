@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using IdentityServer4.Models;
+using IdentityServer4.Test;
+using Smart.ERP.IdentityServer;
 
 namespace Smart.ERP
 {
@@ -27,8 +30,17 @@ namespace Smart.ERP
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // Add framework services.
             services.AddMvc();
+
+            services.AddIdentityServer()
+    .AddInMemoryClients(Clients.Get())
+    .AddInMemoryIdentityResources(Smart.ERP.IdentityServer.Resources.GetIdentityResources())
+    .AddInMemoryApiResources(Smart.ERP.IdentityServer.Resources.GetApiResources())
+    .AddTestUsers(Users.Get())
+    .AddTemporarySigningCredential();
+            
+            // Add framework services.
+           
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -38,6 +50,9 @@ namespace Smart.ERP
             loggerFactory.AddDebug();
 
             app.UseMvc();
+            app.UseIdentityServer();
+            app.UseStaticFiles();
+            app.UseMvcWithDefaultRoute();
         }
     }
 }
